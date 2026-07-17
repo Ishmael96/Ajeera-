@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AJEER — Casual & Skilled Labor Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1b33; --navy:#14213d; --blue:#2563eb; --blue-deep:#1d4ed8; --blue-pale:#eaf0fe;
+    --bg:#ffffff; --bg-soft:#f6f7f9; --line:#e3e6eb; --muted:#667085; --red:#dc2626; --red-pale:#fdecec;
+    --green:#16a34a; --green-pale:#e9f7ee; --amber:#d97706; --amber-pale:#fef3e2;
+  }
+  *{box-sizing:border-box; min-width:0;}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
+  a{color:inherit;cursor:pointer;}
+  img{max-width:100%;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+  .view{display:none;}
+  .view.active{display:block;}
+  h1,h2,h3{font-weight:800;letter-spacing:-0.02em;}
+
+  /* ===== NAV ===== */
+  header.top{background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60;}
+  .navbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:1180px;margin:0 auto;gap:10px;}
+  .brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:inherit;flex-shrink:0;}
+  .brand .mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px;flex-shrink:0;}
+  .brand-text{font-weight:800;font-size:19px;letter-spacing:-0.03em;}
+  .brand-sub{font-size:10px;color:var(--muted);letter-spacing:0.3px;margin-top:-2px;}
+
+  .nav-menu{display:flex;align-items:center;gap:2px;}
+  .nav-item{position:relative;}
+  .nav-btn{background:none;border:none;color:var(--ink);font-weight:600;font-size:14px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:5px;border-radius:6px;}
+  .nav-btn:hover, .nav-btn.open{background:var(--bg-soft);}
+  .nav-btn .caret{font-size:10px;color:var(--muted);transition:transform .15s;}
+  .nav-btn.open .caret{transform:rotate(180deg);}
+  .dropdown{position:absolute;top:100%;left:0;background:#fff;border:1px solid var(--line);border-radius:10px;min-width:230px;padding:6px;display:none;box-shadow:0 12px 28px rgba(15,27,51,0.12);margin-top:8px;}
+  .dropdown.open{display:block;}
+  .dropdown a{display:block;padding:10px 12px;font-size:13.5px;font-weight:600;color:var(--ink);border-radius:6px;}
+  .dropdown a:hover{background:var(--bg-soft);}
+  .dropdown a small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px;}
+
+  .nav-actions{display:flex;gap:8px;align-items:center;}
+  .hamburger{display:none;background:none;border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:18px;align-items:center;justify-content:center;}
+  .account-pill{display:flex;align-items:center;gap:7px;padding:7px 10px 7px 8px;background:var(--bg-soft);border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line);}
+  .account-pill .avatar{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+  .btn{font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;padding:10px 16px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .08s ease, background .1s;white-space:nowrap;}
+  .btn:active{transform:translateY(1px);}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:#fff;}
+  .btn-ghost:hover{background:var(--bg-soft);}
+  .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .btn-primary:hover{background:var(--blue-deep);}
+  .btn-dark{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .btn-dark:hover{background:var(--navy);}
+  .btn-danger{background:var(--red);color:#fff;border-color:var(--red);}
+  .btn-block{width:100%;padding:12px;font-size:14.5px;}
+  .btn:disabled{opacity:0.55;cursor:not-allowed;}
+  .btn-sm{padding:7px 12px;font-size:12.5px;}
+
+  .mobile-menu{display:none;position:fixed;inset:0;background:#fff;z-index:200;padding:16px;overflow-y:auto;}
+  .mobile-menu.open{display:block;}
+  .mobile-menu-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .mobile-menu-close{background:none;border:none;color:var(--ink);font-size:26px;cursor:pointer;}
+  .mobile-section-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);font-weight:700;padding:16px 4px 6px;}
+  .mobile-link{display:block;padding:12px 4px;color:var(--ink);font-weight:600;font-size:15px;border-bottom:1px solid var(--line);}
+  .mobile-link small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px;}
+
+  /* ===== HERO ===== */
+  .hero{background:var(--bg-soft);padding:40px 20px 46px;border-bottom:1px solid var(--line);}
+  .hero-eyebrow{font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+  .hero h1{font-size:clamp(26px,6.5vw,46px);line-height:1.08;margin:0 0 14px;max-width:820px;color:var(--ink);}
+  .hero h1 span{color:var(--blue);}
+  .hero p.lede{font-size:15.5px;color:var(--muted);max-width:560px;line-height:1.55;margin:0 0 22px;}
+  .hero-stats{display:flex;gap:0;flex-wrap:wrap;margin-top:22px;border-top:1px solid var(--line);}
+  .stat{padding:14px 22px 0 0;margin-right:18px;min-width:90px;}
+  .stat b{font-size:22px;color:var(--ink);display:block;font-weight:800;}
+  .stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;}
+  .hero-countries{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;}
+  .flag-chip{font-size:12px;background:#fff;border:1px solid var(--line);padding:5px 10px;border-radius:20px;color:var(--ink);font-weight:500;}
+
+  /* ===== CONTROLS ===== */
+  .controls{background:#fff;border-bottom:1px solid var(--line);padding:16px;position:sticky;top:59px;z-index:20;}
+  .country-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+  .tab{font-weight:600;font-size:13px;padding:7px 12px;background:#fff;border:1.5px solid var(--line);border-radius:20px;cursor:pointer;color:var(--ink);white-space:nowrap;flex-shrink:0;}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .row2{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;}
+  .search-box{flex:1 1 100%;position:relative;}
+  .search-box input{width:100%;padding:10px 14px 10px 34px;border:1.5px solid var(--line);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;background:#fff;}
+  .search-box::before{content:"\2315";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--muted);}
+  .row2 > .urgent-toggle, .row2 > .sortsel{flex:1 1 auto;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;overflow-x:auto;padding-bottom:2px;}
+  .chip{font-size:12px;font-weight:600;padding:6px 11px;border:1.5px solid var(--line);border-radius:20px;cursor:pointer;background:#fff;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+  .chip.active{background:var(--blue-pale);color:var(--blue-deep);border-color:var(--blue);}
+  .urgent-toggle{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:600;padding:9px 10px;border:1.5px solid var(--red);border-radius:8px;cursor:pointer;color:var(--red);background:#fff;}
+  .urgent-toggle.active{background:var(--red);color:#fff;}
+  select.sortsel{padding:9px 8px;border:1.5px solid var(--line);border-radius:8px;font-family:'Inter',sans-serif;font-size:12.5px;background:#fff;width:100%;color:var(--ink);}
+
+  /* ===== PROMO BANNER ===== */
+  .premium-banner{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:600;text-align:center;flex-wrap:wrap;cursor:pointer;}
+  .premium-banner b{color:#7fa6ff;}
+  .nav-btn.premium-pulse{position:relative;}
+  .nav-btn.premium-pulse::after{content:"";position:absolute;top:6px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 0 rgba(37,99,235,0.6);animation:pulseBlue 1.8s infinite;}
+  @keyframes pulseBlue{0%{box-shadow:0 0 0 0 rgba(37,99,235,0.55);}70%{box-shadow:0 0 0 7px rgba(37,99,235,0);}100%{box-shadow:0 0 0 0 rgba(37,99,235,0);}}
+
+  /* ===== RESULTS ===== */
+  .results-bar{max-width:1180px;margin:20px auto 6px;padding:0 20px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;}
+  .results-bar h2{font-size:18px;margin:0;}
+  .results-count{font-size:12px;color:var(--muted);}
+  .grid{max-width:1180px;margin:0 auto;padding:14px 16px 70px;display:grid;grid-template-columns:1fr;gap:14px;}
+  @media (min-width:640px){ .grid{grid-template-columns:repeat(2,1fr);padding:16px 20px 70px;} }
+  @media (min-width:980px){ .grid{grid-template-columns:repeat(3,1fr);} }
+
+  /* ===== JOB CARD ===== */
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;position:relative;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;transition:box-shadow .12s, border-color .12s;}
+  .card:hover{box-shadow:0 8px 22px rgba(15,27,51,0.08);border-color:#d7dbe3;}
+  .card .c-top{padding:16px 16px 12px;}
+  .c-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .c-cat{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--blue-deep);background:var(--blue-pale);padding:4px 8px;border-radius:5px;display:inline-block;}
+  .c-urgent{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--red);background:var(--red-pale);padding:4px 8px;border-radius:5px;display:inline-block;}
+  .c-id{font-size:11px;color:var(--muted);}
+  .c-title{font-size:17px;margin:6px 0 6px;line-height:1.2;word-break:break-word;font-weight:700;}
+  .c-loc{font-size:13px;color:var(--muted);margin-bottom:9px;word-break:break-word;}
+  .c-desc{font-size:13px;color:#3d4451;line-height:1.5;margin-bottom:12px;}
+  .c-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .c-meta b{color:var(--ink);}
+  .c-stub{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;background:var(--bg-soft);border-top:1px solid var(--line);gap:8px;flex-wrap:wrap;}
+  .c-salary b{font-size:17px;color:var(--ink);font-weight:800;}
+  .c-salary span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;}
+  .empty,.loading{text-align:center;padding:50px 16px;color:var(--muted);font-size:13px;grid-column:1/-1;}
+
+  .status-badge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:0.3px;display:inline-block;}
+  .status-submitted{background:var(--bg-soft);color:var(--muted);}
+  .status-viewed{background:#eaf1fb;color:#2f6fb0;}
+  .status-contacted{background:var(--amber-pale);color:var(--amber);}
+  .status-hired{background:var(--green-pale);color:var(--green);}
+  .status-closed{background:var(--red-pale);color:var(--red);}
+
+  /* ===== MODAL ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,27,51,0.5);display:none;align-items:center;justify-content:center;z-index:150;padding:16px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;border:1px solid var(--line);position:relative;}
+  .modal-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);}
+  .modal-body{padding:26px 22px;}
+  .modal h3{font-size:19px;margin:0 0 4px;}
+  .modal .modal-sub{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .form-row{margin-bottom:14px;}
+  .form-row label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+  .form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;background:#fff;}
+  .form-row textarea{resize:vertical;min-height:70px;}
+  .form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media (max-width:480px){ .form-grid2{grid-template-columns:1fr;} }
+  .form-msg{margin-top:12px;font-size:12.5px;padding:10px 12px;border-radius:8px;display:none;word-break:break-word;}
+  .form-msg.ok{display:block;background:var(--green-pale);color:#166534;border:1px solid #bbe5c8;}
+  .form-msg.err{display:block;background:var(--red-pale);color:var(--red);border:1px solid #f3c6c6;}
+  .checkline{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .checkline input{width:auto;}
+  .phone-group{display:flex;gap:6px;}
+  .phone-group select{flex:0 0 112px;padding:10px 6px;border:1.5px solid var(--line);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;background:#fff;}
+  .phone-group input{flex:1;}
+
+  .page-hero{background:var(--bg-soft);border-bottom:1px solid var(--line);padding:28px 18px;}
+  .page-hero h1{font-size:clamp(22px,6vw,30px);margin:0 0 8px;}
+  .page-hero p{color:var(--muted);margin:0;font-size:14px;max-width:560px;}
+  .form-card{max-width:640px;margin:24px auto 60px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 18px;}
+  .form-card h2{font-size:16px;margin-top:0;}
+  .multiselect{display:flex;gap:7px;flex-wrap:wrap;}
+
+  .detail-wrap{max-width:760px;margin:24px auto 60px;padding:0 16px;}
+  .back-link{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-block;margin-bottom:14px;cursor:pointer;font-weight:600;}
+  .detail-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;}
+  .map-box{height:220px;border-top:1px solid var(--line);}
+
+  /* dashboard */
+  .lookup-card{max-width:420px;margin:30px auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 20px;text-align:center;}
+  .lookup-card h2{font-size:17px;margin:0 0 6px;}
+  .lookup-card p{color:var(--muted);font-size:13px;margin:0 0 16px;}
+  .otp-test-banner{background:var(--blue-pale);border:1.5px dashed var(--blue);color:var(--blue-deep);font-size:12.5px;padding:10px 12px;border-radius:8px;margin:10px 0;text-align:left;}
+  .password-display{font-size:26px;letter-spacing:6px;text-align:center;color:var(--blue-deep);font-weight:800;margin:8px 0;font-family:monospace;}
+  .detect-spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--blue);border-radius:50%;margin:14px auto;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .dash-job{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+  .dash-job-head{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:var(--bg-soft);}
+  .dash-job-head b{font-size:15px;}
+  .dash-app{padding:12px 16px;border-top:1px solid var(--line);}
+  .dash-app-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .dash-app-name{font-weight:700;font-size:13.5px;}
+  .dash-app-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .status-select{font-size:11.5px;padding:5px 8px;border:1.5px solid var(--line);border-radius:6px;background:#fff;}
+  .loc-link{font-size:12px;color:var(--blue);font-weight:600;text-decoration:underline;}
+
+  /* premium */
+  .tier-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:760px;margin:0 auto;}
+  @media (min-width:680px){ .tier-grid{grid-template-columns:1fr 1fr;} }
+  .tier-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 20px;}
+  .tier-card.expert{border-color:var(--blue);background:var(--blue-pale);}
+  .tier-name{font-size:19px;margin:0 0 4px;font-weight:800;}
+  .tier-price{font-size:14px;color:var(--muted);margin-bottom:14px;}
+  .tier-list{list-style:none;padding:0;margin:0 0 18px;font-size:13.5px;line-height:2;}
+  .tier-list li::before{content:"\2713  ";color:var(--blue);font-weight:700;}
+
+  footer{background:var(--navy);color:#c3cade;padding:34px 18px 24px;font-size:13px;}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:22px;}
+  footer h4{color:#fff;font-size:14px;margin:0 0 10px;}
+  footer .col{max-width:280px;}
+  footer .disclaimer{max-width:1180px;margin:24px auto 0;padding-top:16px;border-top:1px solid #2a3654;font-size:11px;color:#8b93ac;line-height:1.6;}
+
+  /* admin */
+  .admin-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+  .admin-tab{padding:8px 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .admin-tab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .admin-lead{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .admin-lead-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .admin-lead-actions{display:flex;gap:8px;margin-top:10px;}
+  .chat-thread-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;}
+  .chat-thread-item:hover{border-color:var(--blue);}
+
+  /* ===== CHAT WIDGET ===== */
+  .chat-toggle{position:fixed;bottom:18px;right:18px;width:54px;height:54px;border-radius:50%;background:var(--blue);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:120;box-shadow:0 6px 18px rgba(37,99,235,0.35);display:flex;align-items:center;justify-content:center;}
+  .chat-panel{position:fixed;bottom:82px;right:18px;width:min(340px, calc(100vw - 32px));max-height:min(480px, calc(100vh - 140px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(15,27,51,0.2);display:none;flex-direction:column;z-index:120;overflow:hidden;}
+  .chat-panel.open{display:flex;}
+  .chat-head{background:var(--ink);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+  .chat-head b{font-size:14px;}
+  .chat-head span{font-size:10px;color:#a9b1c9;}
+  .chat-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;}
+  .chat-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:160px;}
+  .chat-msg{max-width:85%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.4;}
+  .chat-msg.bot,.chat-msg.admin{background:var(--bg-soft);align-self:flex-start;border-bottom-left-radius:3px;}
+  .chat-msg.user{background:var(--blue);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+  .chat-quick{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 10px;}
+  .chat-quick button{font-size:11.5px;padding:5px 9px;border-radius:14px;border:1.5px solid var(--line);background:#fff;cursor:pointer;font-weight:600;}
+  .chat-input-row{display:flex;gap:6px;padding:10px;border-top:1px solid var(--line);}
+  .chat-input-row input{flex:1;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;}
+  .chat-input-row button{background:var(--blue);border:none;color:#fff;font-weight:700;padding:0 14px;border-radius:8px;cursor:pointer;font-size:13px;}
+
+  @media (min-width:860px){ .hamburger{display:none !important;} .nav-menu{display:flex !important;} }
+  @media (max-width:859px){
+    .nav-menu{display:none !important;}
+    .hamburger{display:flex !important;}
+    .navbar{flex-wrap:nowrap;}
+    .brand-sub{display:none;}
+    .controls{top:57px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="navbar">
+    <a class="brand" onclick="goHome()">
+      <div class="mark">A</div>
+      <div><div class="brand-text">AJEER</div><div class="brand-sub">Gulf &amp; Levant Manpower Exchange</div></div>
+    </a>
+
+    <nav class="nav-menu" id="navMenu">
+      <div class="nav-item">
+        <button class="nav-btn" data-dd="ddEmployers">Employers <span class="caret">▾</span></button>
+        <div class="dropdown" id="ddEmployers">
+          <a onclick="showView('postJob'); closeDropdowns();">Post a job<small>Live in under a minute</small></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button class="nav-btn" data-dd="ddWorkers">Workers <span class="caret">▾</span></button>
+        <div class="dropdown" id="ddWorkers">
+          <a onclick="showView('registerWorker'); closeDropdowns();">Create a profile<small>Get discovered for matching roles</small></a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button class="nav-btn premium-pulse" onclick="showView('premium')">Premium</button>
+      </div>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openChat()">Help</button>
+      <div id="navLoggedOut">
+        <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Log in</button>
+      </div>
+      <div id="navLoggedIn" class="nav-item" style="display:none;">
+        <div class="account-pill" data-dd="ddAccount"><span class="avatar" id="accountAvatar">A</span><span id="accountLabel">Account</span> <span class="caret">▾</span></div>
+        <div class="dropdown" id="ddAccount">
+          <a onclick="showView('myAccount','postings'); closeDropdowns();">My postings<small>Applications received</small></a>
+          <a onclick="showView('myAccount','applications'); closeDropdowns();">My applications<small>Track status</small></a>
+          <a onclick="logout();">Log out</a>
+        </div>
+      </div>
+      <button class="hamburger" onclick="openMobileMenu()">☰</button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-head">
+    <div class="brand-text">AJEER</div>
+    <button class="mobile-menu-close" onclick="closeMobileMenu()">&times;</button>
+  </div>
+  <div class="mobile-section-title">Employers</div>
+  <a class="mobile-link" onclick="mnav('postJob')">Post a job</a>
+  <div class="mobile-section-title">Workers</div>
+  <a class="mobile-link" onclick="mnav('registerWorker')">Create a profile</a>
+  <div class="mobile-section-title">My account</div>
+  <a class="mobile-link" id="mLoginLink" onclick="closeMobileMenu(); openLoginModal();">Log in</a>
+  <a class="mobile-link" id="mPostingsLink" style="display:none;" onclick="closeMobileMenu(); showView('myAccount','postings');">My postings</a>
+  <a class="mobile-link" id="mApplicationsLink" style="display:none;" onclick="closeMobileMenu(); showView('myAccount','applications');">My applications</a>
+  <a class="mobile-link" id="mLogoutLink" style="display:none;" onclick="logout();">Log out</a>
+  <div class="mobile-section-title">More</div>
+  <a class="mobile-link" onclick="mnav('premium')">Premium — Ajeer Expert</a>
+  <a class="mobile-link" onclick="closeMobileMenu(); openChat();">Help / Chat</a>
+  <a class="mobile-link" onclick="mnav('home')">Job board</a>
+</div>
+
+<!-- ================= HOME ================= -->
+<div class="view active" id="view-home">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-eyebrow">Live job board</div>
+      <h1>Casual and skilled hands, <span>hired by tomorrow.</span></h1>
+      <p class="lede">Cleaners, cooks, drivers, watchmen and site crews for households, offices and construction sites across the Gulf and Levant. Real going-rate wages, posted by verified households and companies.</p>
+      <div class="hero-stats">
+        <div class="stat"><b id="statLive">—</b><span>Live jobs</span></div>
+        <div class="stat"><b id="statUrgent">—</b><span>Urgent</span></div>
+        <div class="stat"><b id="statCountries">7</b><span>Countries</span></div>
+        <div class="stat"><b id="statApps">—</b><span>Applications</span></div>
+      </div>
+      <div class="hero-countries" id="flagRow"></div>
+    </div>
+  </section>
+
+  <div class="controls">
+    <div class="wrap" style="padding:0;">
+      <div class="country-tabs" id="countryTabs"></div>
+      <div class="row2">
+        <div class="search-box"><input id="searchInput" placeholder="Search 'driver', 'caregiver', 'hotel'..."></div>
+        <div class="urgent-toggle" id="urgentToggle" style="flex:1 1 48%;">Urgent only</div>
+        <select class="sortsel" id="sortSel" style="flex:1 1 48%;">
+          <option value="new">Newest first</option>
+          <option value="salary_desc">Salary: high to low</option>
+          <option value="salary_asc">Salary: low to high</option>
+        </select>
+      </div>
+      <div class="chips" id="statusChips" style="margin-top:8px;"></div>
+      <div class="chips" id="categoryChips"></div>
+    </div>
+  </div>
+
+  <div class="premium-banner" onclick="showView('premium')">Ajeer <b>Expert</b> — a professionally drafted CV, a Verified badge, and priority placement on urgent jobs. See plans →</div>
+  <div class="results-bar"><h2>Open positions</h2><div class="results-count" id="resultsCount">— listings</div></div>
+  <div class="grid" id="jobGrid"><div class="loading">Loading jobs from the server…</div></div>
+</div>
+
+<!-- ================= JOB DETAIL ================= -->
+<div class="view" id="view-detail"><div class="detail-wrap" id="detailWrap"></div></div>
+
+<!-- ================= POST A JOB ================= -->
+<div class="view" id="view-postJob">
+  <div class="page-hero"><h1>Post an opening</h1><p>You'll get an account automatically once this is submitted — no separate signup needed.</p></div>
+  <div class="form-card">
+    <h2>Job details</h2>
+    <form id="postJobForm">
+      <div class="form-row"><label>Job title</label><input type="text" id="fTitle" placeholder="e.g. Live-in Housemaid" required></div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Category</label><select id="fCategory" required></select></div>
+        <div class="form-row"><label>Country</label><select id="fCountry" required></select></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>City</label><input type="text" id="fCity" placeholder="e.g. Dubai" required></div>
+        <div class="form-row"><label>Your name / company</label><input type="text" id="fClient" placeholder="e.g. Al Waha Household" required></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Contact phone</label><div class="phone-group"><select id="fCountryCode"></select><input type="text" id="fPhone" placeholder="e.g. 500000000" required></div></div>
+        <div class="form-row"><label>Email (optional)</label><input type="email" id="fEmail" placeholder="you@example.com"></div>
+      </div>
+      <div class="form-row">
+        <label>Pin the exact location <span style="font-weight:400;color:var(--muted);">(drag the marker)</span></label>
+        <div id="postMap" style="height:200px;border:1.5px solid var(--line);border-radius:8px;"></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Salary amount</label><input type="number" id="fSalary" min="1" placeholder="e.g. 1800" required></div>
+        <div class="form-row"><label>Pay period</label><select id="fSalaryUnit"><option value="/ month">Per month</option><option value="/ day">Per day</option></select></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Job type</label>
+          <select id="fJobType">
+            <option>Full-time - Live-in</option><option>Full-time - Live-out</option>
+            <option>Daily wage</option><option>Part-time</option><option>2-week contract</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Number of positions</label><input type="number" id="fPositions" min="1" value="1"></div>
+      </div>
+      <div class="form-row"><label>Description</label><textarea id="fDescription" placeholder="Duties, working hours, requirements..."></textarea></div>
+      <div class="form-row checkline"><input type="checkbox" id="fUrgent"><label style="margin:0;font-size:14px;font-weight:400;">Mark as urgent — needed within 48 hours</label></div>
+      <button type="submit" class="btn btn-primary btn-block">Publish listing</button>
+      <div class="form-msg" id="postMsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= REGISTER WORKER ================= -->
+<div class="view" id="view-registerWorker">
+  <div class="page-hero"><h1>Create your profile</h1><p>You'll get an account automatically so you can track applications and go Expert later.</p></div>
+  <div class="form-card">
+    <h2>Your details</h2>
+    <form id="workerForm">
+      <div class="form-grid2">
+        <div class="form-row"><label>Full name</label><input type="text" id="wName" required></div>
+        <div class="form-row"><label>Phone / WhatsApp</label><div class="phone-group"><select id="wCountryCode"></select><input type="text" id="wPhone" required></div></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Email (optional)</label><input type="email" id="wEmail"></div>
+        <div class="form-row"><label>Nationality</label><input type="text" id="wNationality" placeholder="e.g. Filipino, Kenyan, Nepali"></div>
+      </div>
+      <div class="form-row"><label>Years of experience</label><input type="number" id="wExperience" min="0" max="50" value="0"></div>
+      <div class="form-row"><label>Type of work</label><select id="wCategory" required></select></div>
+      <div class="form-row"><label>Countries you'd consider working in</label><div class="multiselect" id="wCountries"></div></div>
+      <div class="form-row"><label>Short bio</label><textarea id="wBio" placeholder="Availability, skills, languages spoken..."></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block">Create profile</button>
+      <div class="form-msg" id="workerMsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= ACCOUNT CREATED / DETECTING THEATER ================= -->
+<div class="view" id="view-accountReveal">
+  <div class="lookup-card" id="accountRevealCard"></div>
+</div>
+
+<!-- ================= LOG IN handled via modal, MY ACCOUNT view below ================= -->
+<div class="view" id="view-myAccount">
+  <div class="page-hero"><h1 id="myAccountTitle">My account</h1><p id="myAccountSub">Everything tied to your phone number in one place.</p></div>
+  <div class="wrap" style="max-width:760px;padding-top:20px;padding-bottom:60px;">
+    <div class="admin-tabs">
+      <div class="admin-tab" id="tabPostings" onclick="switchAccountTab('postings')">My postings</div>
+      <div class="admin-tab" id="tabApplications" onclick="switchAccountTab('applications')">My applications</div>
+      <div class="admin-tab" id="tabRecent" onclick="switchAccountTab('recent')">Recently viewed</div>
+      <div class="admin-tab" id="tabPassword" onclick="switchAccountTab('password')">Account settings</div>
+    </div>
+    <div id="accountContent"></div>
+  </div>
+</div>
+
+<!-- ================= PREMIUM ================= -->
+<div class="view" id="view-premium">
+  <div class="page-hero"><h1>Ajeer Expert</h1><p>A paid tier for workers who want to stand out: a professionally drafted CV, a verified badge, and priority placement on urgent jobs.</p></div>
+  <div class="wrap" style="padding-top:26px;padding-bottom:60px;">
+    <div class="tier-grid">
+      <div class="tier-card">
+        <div class="tier-name">Standard</div>
+        <div class="tier-price">Free</div>
+        <ul class="tier-list">
+          <li>Browse and apply to all jobs</li>
+          <li>Basic profile visible to employers</li>
+          <li>Application tracking</li>
+        </ul>
+      </div>
+      <div class="tier-card expert">
+        <div class="tier-name">Expert</div>
+        <div class="tier-price" id="expertPriceLabel">$9 / month (demo pricing)</div>
+        <ul class="tier-list">
+          <li>Professionally drafted, translated CV</li>
+          <li>"Verified" badge on your profile</li>
+          <li>Priority placement on urgent jobs</li>
+          <li>Boosted visibility to employers</li>
+        </ul>
+        <button class="btn btn-dark btn-block" onclick="openInterestModal()">Express interest — arrange payment</button>
+      </div>
+    </div>
+    <div class="form-card" style="margin-top:26px;">
+      <h2>Already Expert? Request your CV draft</h2>
+      <form id="cvRequestForm">
+        <div class="form-row"><label>Your phone (must match an Expert profile)</label><input type="text" id="cvPhone" required></div>
+        <div class="form-grid2">
+          <div class="form-row"><label>Full name</label><input type="text" id="cvName" required></div>
+          <div class="form-row"><label>Current / most recent role</label><input type="text" id="cvRole" placeholder="e.g. Housemaid"></div>
+        </div>
+        <div class="form-row"><label>Target country</label><input type="text" id="cvCountry" placeholder="e.g. UAE"></div>
+        <div class="form-row"><label>Experience summary</label><textarea id="cvSummary" placeholder="Roles, years, skills, languages..."></textarea></div>
+        <button type="submit" class="btn btn-primary btn-block">Submit CV request</button>
+        <div class="form-msg" id="cvMsg"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div class="view" id="view-admin">
+  <div class="page-hero" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;">
+    <div><h1>Admin</h1><p>Review Expert requests, support tickets, and reply to applicant messages.</p></div>
+    <button class="btn btn-ghost btn-sm" id="adminLogoutBtn" style="display:none;" onclick="adminLogout()">Log out</button>
+  </div>
+  <div class="lookup-card" id="adminLoginCard">
+    <h2>Admin login</h2>
+    <div class="form-row" style="text-align:left;"><label>Password</label><input type="password" id="adminPassword"></div>
+    <button class="btn btn-primary btn-block" onclick="adminLogin()">Enter</button>
+    <div class="form-msg" id="adminLoginMsg"></div>
+  </div>
+  <div class="wrap" id="adminResults" style="max-width:760px;display:none;padding-bottom:60px;">
+    <div class="admin-tabs">
+      <div class="admin-tab active" id="adminTabLeads" onclick="switchAdminTab('leads')">Expert requests</div>
+      <div class="admin-tab" id="adminTabTickets" onclick="switchAdminTab('tickets')">Support tickets</div>
+      <div class="admin-tab" id="adminTabChats" onclick="switchAdminTab('chats')">Messages</div>
+      <div class="admin-tab" id="adminTabAnalytics" onclick="switchAdminTab('analytics')">Analytics</div>
+      <div class="admin-tab" id="adminTabAccounts" onclick="switchAdminTab('accounts')">Accounts</div>
+      <div class="admin-tab" id="adminTabPassword" onclick="switchAdminTab('password')">Change password</div>
+    </div>
+    <div id="adminPaneLeads"><div id="adminLeads"></div></div>
+    <div id="adminPaneTickets" style="display:none;"><div id="adminTickets"></div></div>
+    <div id="adminPaneChats" style="display:none;">
+      <div id="adminChatList"></div>
+      <div id="adminChatThreadWrap" style="display:none;">
+        <a class="back-link" onclick="closeAdminChatThread()">&larr; All conversations</a>
+        <div class="dash-job">
+          <div class="dash-job-head"><b id="adminChatPhone"></b></div>
+          <div id="adminChatThread" style="max-height:320px;overflow-y:auto;padding:14px 16px;"></div>
+          <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);">
+            <input type="text" id="adminChatReplyInput" placeholder="Type a reply..." style="flex:1;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;">
+            <button class="btn btn-primary btn-sm" onclick="adminSendReply()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="adminPaneAnalytics" style="display:none;"><div id="adminAnalytics"></div></div>
+    <div id="adminPaneAccounts" style="display:none;">
+      <div class="lookup-card" style="margin:0 0 16px;">
+        <div class="form-row" style="text-align:left;"><label>Search by phone (or leave blank for recent)</label><input type="text" id="adminAccountSearch"></div>
+        <button class="btn btn-ghost btn-block" onclick="refreshAdminAccounts()">Search</button>
+      </div>
+      <div id="adminAccountsList"></div>
+    </div>
+    <div id="adminPanePassword" style="display:none;">
+      <div class="form-card" style="margin:0;">
+        <h2>Change admin password</h2>
+        <form id="adminChangePwForm">
+          <div class="form-row"><label>Current password</label><input type="password" id="adminCurrentPw" required></div>
+          <div class="form-row"><label>New password</label><input type="password" id="adminNewPw" required minlength="4"></div>
+          <button type="submit" class="btn btn-primary btn-block">Update password</button>
+          <div class="form-msg" id="adminChangePwMsg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<footer>
+  <div class="wrap">
+    <div class="col">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">
+        <div class="mark" style="width:30px;height:30px;font-size:14px;">A</div>
+        <h4 style="margin:0;">AJEERA QATAR GROUP</h4>
+      </div>
+      <p>A global manpower exchange connecting households, offices and site contractors with cleaners, cooks, drivers, caregivers and skilled trade workers.</p>
+      <p style="margin-top:10px;">ajeera_qatar@jobs.com</p>
+    </div>
+    <div class="col">
+      <h4>Countries served</h4>
+      <p>UAE · Qatar · Turkey · Oman · Bahrain · Jordan · Kuwait</p>
+    </div>
+    <div class="col">
+      <h4>Africa correspondence</h4>
+      <p>Kenya — Nairobi<br>Westlands, Parkfield Towers, 10th Floor</p>
+    </div>
+  </div>
+  <div class="disclaimer">© AJEERA QATAR GROUP.</div>
+</footer>
+
+<!-- Apply modal -->
+<div class="modal-overlay" id="applyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('applyModal')">&times;</button>
+    <div class="modal-body">
+      <h3 id="modalJobTitle">Apply for this job</h3>
+      <div class="modal-sub" id="modalJobSub"></div>
+      <form id="applyForm">
+        <input type="hidden" id="applyJobId">
+        <div class="form-row"><label>Full name</label><input type="text" id="applyName" required></div>
+        <div class="form-grid2">
+          <div class="form-row"><label>Phone / WhatsApp</label><div class="phone-group"><select id="applyCountryCode"></select><input type="text" id="applyPhone" required></div></div>
+          <div class="form-row"><label>Nationality</label><input type="text" id="applyNationality"></div>
+        </div>
+        <div class="form-row"><label>Years of experience</label><input type="number" id="applyExperience" min="0" max="50" value="0"></div>
+        <div class="form-row"><label>Message (optional)</label><textarea id="applyMessage" placeholder="Tell the employer a bit about yourself..."></textarea></div>
+        <div class="form-row checkline"><input type="checkbox" id="applyShareLocation"><label style="margin:0;font-size:13.5px;font-weight:400;">Share my exact location with the employer (optional)</label></div>
+        <button type="submit" class="btn btn-primary btn-block">Submit application</button>
+        <div class="form-msg" id="applyMsg"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Login modal -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+    <div class="modal-body">
+      <h3>Log in</h3>
+      <div class="modal-sub">First time? Start with the last 5 digits of your phone number as a one-time PIN — set your own once you're in.</div>
+      <form id="loginForm">
+        <div class="form-row"><label>Phone number</label><div class="phone-group"><select id="loginCountryCode"></select><input type="text" id="loginPhoneLocal" placeholder="e.g. 501234567" required></div></div>
+        <div class="form-row"><label>PIN</label><input type="text" id="loginPassword" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+        <div class="form-msg" id="loginMsg"></div>
+      </form>
+      <a onclick="showForgot()" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--blue);font-weight:600;">Forgot / can't access?</a>
+      <form id="forgotForm" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px;">
+        <div class="form-row"><label>Full phone number</label><div class="phone-group"><select id="forgotCountryCode"></select><input type="text" id="forgotPhoneLocal" placeholder="e.g. 501234567" required></div></div>
+        <div class="form-row"><label>Email on file</label><input type="email" id="forgotEmail"></div>
+        <div class="form-row"><label>Previous PIN</label><input type="text" id="forgotPrevPassword" required></div>
+        <button type="submit" class="btn btn-dark btn-block">Confirm &amp; log in</button>
+        <div class="form-msg" id="forgotMsg"></div>
+      </form>
+      <a onclick="showSecurityRecovery()" style="display:block;text-align:center;margin-top:10px;font-size:12.5px;color:var(--muted);font-weight:600;">Don't remember your PIN either? Use your security question</a>
+      <form id="securityRecoveryForm" style="display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px;">
+        <div class="form-row"><label>Full phone number</label><div class="phone-group"><select id="secRecoveryCountryCode"></select><input type="text" id="secRecoveryPhoneLocal" placeholder="e.g. 501234567" required></div></div>
+        <button type="button" class="btn btn-ghost btn-block btn-sm" onclick="loadSecurityQuestionForRecovery()">Find my security question</button>
+        <div id="secRecoveryQuestionWrap" style="display:none;margin-top:12px;">
+          <div class="form-row"><label id="secRecoveryQuestionLabel">Security question</label><input type="text" id="secRecoveryAnswer" placeholder="Your answer"></div>
+          <div class="form-row"><label>New PIN</label><input type="text" id="secRecoveryNewPin" minlength="4"></div>
+          <button type="submit" class="btn btn-dark btn-block">Set new PIN &amp; log in</button>
+        </div>
+        <div class="form-msg" id="secRecoveryMsg"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Express interest modal -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('upgradeModal')">&times;</button>
+    <div class="modal-body">
+      <h3>Go Ajeer Expert</h3>
+      <div class="modal-sub">Tell us how you'd like to pay — our team will reach out to arrange it. No payment is taken here.</div>
+      <div class="otp-test-banner" style="margin-bottom:16px;">Payment is subject to admin approval. Job listings aren't static — they open and close over time — so it's a good idea to inquire and confirm before sending any payment.</div>
+      <form id="upgradeForm">
+        <div class="form-row"><label>Your registered phone number</label><input type="text" id="upgradePhone" required></div>
+        <div class="form-row"><label>Full name</label><input type="text" id="upgradeName" required></div>
+        <div class="form-row"><label>Preferred payment method</label>
+          <select id="upgradePaymentMethod">
+            <option>M-Pesa</option>
+            <option>Airtel Money</option>
+            <option>Bank transfer</option>
+            <option>PayPal (limited availability)</option>
+            <option>Skrill</option>
+            <option>Crypto</option>
+            <option>Cash agent / in person</option>
+            <option>Other — explain below</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Note (optional)</label><textarea id="upgradeNote" placeholder="Best time to reach you, or details on your preferred method..."></textarea></div>
+        <button type="submit" class="btn btn-dark btn-block">Send interest</button>
+        <div class="form-msg" id="upgradeMsg"></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Post-application nudge -->
+<div class="modal-overlay" id="nudgeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('nudgeModal')">&times;</button>
+    <div class="modal-body">
+      <h3>Want to stand out?</h3>
+      <div class="modal-sub">You've applied to a few jobs — Ajeer Expert members get a professionally drafted CV and priority placement on urgent listings.</div>
+      <button class="btn btn-dark btn-block" onclick="closeModal('nudgeModal'); showView('premium');">See Expert plans</button>
+      <button class="btn btn-ghost btn-block" style="margin-top:8px;" onclick="closeModal('nudgeModal')">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat widget -->
+<button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <div><b>Ajeer Support</b><br><span>We reply here personally</span></div>
+    <button class="chat-close" onclick="toggleChat()">&times;</button>
+  </div>
+  <div id="chatPhoneGate" style="padding:14px;">
+    <div class="form-row"><label>Your phone number</label><input type="text" id="chatPhoneInput" placeholder="So we can reply to you"></div>
+    <button class="btn btn-primary btn-block btn-sm" onclick="startChat()">Start chat</button>
+  </div>
+  <div id="chatMain" style="display:none;flex:1;display:none;flex-direction:column;min-height:0;">
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-quick" id="chatQuick"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type a question...">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= API ================= */
+const API = {
+  async meta(){ return (await fetch('/api/meta')).json(); },
+  async stats(){ return (await fetch('/api/stats')).json(); },
+  async jobs(params={}){ const qs=new URLSearchParams(params).toString(); return (await fetch('/api/jobs'+(qs?'?'+qs:''))).json(); },
+  async job(id){ return (await fetch('/api/jobs/'+id)).json(); },
+  async createJob(payload){ const r=await fetch('/api/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async apply(jobId,payload){ const r=await fetch(`/api/jobs/${jobId}/apply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async setAppStatus(appId,status){ const r=await fetch(`/api/applications/${appId}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); return {ok:r.ok, data: await r.json()}; },
+  async employerDash(phone,token){ return (await fetch('/api/dashboard/employer?phone='+encodeURIComponent(phone)+'&token='+encodeURIComponent(token||''))).json(); },
+  async workerDash(phone,token){ return (await fetch('/api/dashboard/worker?phone='+encodeURIComponent(phone)+'&token='+encodeURIComponent(token||''))).json(); },
+  async registerWorker(payload){ const r=await fetch('/api/workers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async login(payload){ const r=await fetch('/api/accounts/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async reset(payload){ const r=await fetch('/api/accounts/reset',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async sessionCheck(phone,token){ return (await fetch('/api/session/check?phone='+encodeURIComponent(phone)+'&token='+encodeURIComponent(token))).json(); },
+  async premiumInterest(payload){ const r=await fetch('/api/premium/interest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async cvRequest(payload){ const r=await fetch('/api/cv-requests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async geocode(q){ return (await fetch('/api/geocode?q='+encodeURIComponent(q))).json(); },
+  async chatSend(phone,message){ const r=await fetch('/api/chat/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,message})}); return {ok:r.ok, data: await r.json()}; },
+  async chatThread(phone){ return (await fetch('/api/chat/thread?phone='+encodeURIComponent(phone))).json(); },
+  async support(payload){ const r=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+  async adminLeads(password){ return (await fetch('/api/admin/premium-leads?password='+encodeURIComponent(password))).json(); },
+  async adminApproveLead(id,password){ const r=await fetch(`/api/admin/premium-leads/${id}/approve`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})}); return {ok:r.ok, data: await r.json()}; },
+  async adminDeclineLead(id,password){ const r=await fetch(`/api/admin/premium-leads/${id}/decline`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})}); return {ok:r.ok, data: await r.json()}; },
+  async adminTickets(password){ return (await fetch('/api/admin/support-tickets?password='+encodeURIComponent(password))).json(); },
+  async adminResolveTicket(id,password){ const r=await fetch(`/api/admin/support-tickets/${id}/resolve`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})}); return {ok:r.ok, data: await r.json()}; },
+  async adminChats(password){ return (await fetch('/api/admin/chats?password='+encodeURIComponent(password))).json(); },
+  async adminChatReply(phone,password,message){ const r=await fetch(`/api/admin/chats/${encodeURIComponent(phone)}/reply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password,message})}); return {ok:r.ok, data: await r.json()}; },
+  async adminChangePassword(payload){ const r=await fetch('/api/admin/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return {ok:r.ok, data: await r.json()}; },
+};
+function fmtMoney(n,c){ return c+' '+Number(n).toLocaleString('en-US'); }
+function postedText(d){ if(d===0) return 'Posted today'; if(d===1) return 'Posted yesterday'; return 'Posted '+d+' days ago'; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function jobStatusBadge(status){
+  if(status === 'gone') return '<span class="c-urgent" style="color:var(--muted);background:var(--bg-soft);">Gone</span>';
+  if(status === 'in_process') return '<span class="c-urgent" style="color:var(--amber);background:var(--amber-pale);">In process</span>';
+  return '';
+}
+function jobCardHTML(j){
+  return `
+    <div class="card" data-id="${j.id}">
+      <div class="c-top">
+        <div class="c-head">
+          <span class="c-cat">${j.category_icon} ${j.category_label}</span>
+          ${j.urgent ? '<span class="c-urgent">Urgent</span>' : ''}
+          ${jobStatusBadge(j.status)}
+        </div>
+        <div class="c-title">${esc(j.title)}</div>
+        <div class="c-loc">${j.country_flag} ${esc(j.city)}, ${j.country_name} &middot; ${esc(j.client_name)}</div>
+        <div class="c-desc">${esc(j.description)}</div>
+        <div class="c-meta"><span><b>${j.job_type}</b></span><span>${j.positions>1?j.positions+' positions':'1 position'}</span><span>${postedText(j.days_ago)}</span></div>
+      </div>
+      <div class="c-stub">
+        <div class="c-salary"><b>${fmtMoney(j.salary_amount, j.currency)}</b><span>${j.salary_unit}</span></div>
+        <button class="btn btn-primary btn-sm" data-apply="${j.id}" ${j.status!=='open'?'disabled':''}>${j.status==='open'?'Apply now':'Not available'}</button>
+      </div>
+    </div>`;
+}
+
+/* ================= View switching ================= */
+function showView(name, sub){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+  closeDropdowns();
+  if(name==='myAccount'){ initMyAccount(sub || 'postings'); }
+}
+function goHome(){ showView('home'); }
+function mnav(name){ closeMobileMenu(); showView(name); }
+
+document.querySelectorAll('.nav-btn[data-dd], .account-pill[data-dd]').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const dd = document.getElementById(btn.dataset.dd);
+    const isOpen = dd.classList.contains('open');
+    closeDropdowns();
+    if(!isOpen){ dd.classList.add('open'); btn.classList.add('open'); }
+  });
+});
+document.addEventListener('click', closeDropdowns);
+function closeDropdowns(){
+  document.querySelectorAll('.dropdown.open').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.nav-btn.open').forEach(b=>b.classList.remove('open'));
+}
+function openMobileMenu(){ document.getElementById('mobileMenu').classList.add('open'); }
+function closeMobileMenu(){ document.getElementById('mobileMenu').classList.remove('open'); }
+
+/* ================= Account / session state ================= */
+const session = { phone: localStorage.getItem('ajeer_phone') || '', token: localStorage.getItem('ajeer_token') || '', username: localStorage.getItem('ajeer_username') || '' };
+function persistSession(phone, token, username){
+  session.phone = phone; session.token = token;
+  if(username) session.username = username;
+  localStorage.setItem('ajeer_phone', phone);
+  localStorage.setItem('ajeer_token', token);
+  if(username) localStorage.setItem('ajeer_username', username);
+  reflectLoginState();
+}
+function logout(){
+  session.phone=''; session.token=''; session.username='';
+  localStorage.removeItem('ajeer_phone'); localStorage.removeItem('ajeer_token'); localStorage.removeItem('ajeer_username');
+  reflectLoginState();
+  goHome();
+  loadJobs(); refreshStats();
+}
+function reflectLoginState(){
+  const loggedIn = !!(session.phone && session.token);
+  document.getElementById('navLoggedOut').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('navLoggedIn').style.display = loggedIn ? 'block' : 'none';
+  document.getElementById('mLoginLink').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('mPostingsLink').style.display = loggedIn ? 'block' : 'none';
+  document.getElementById('mApplicationsLink').style.display = loggedIn ? 'block' : 'none';
+  document.getElementById('mLogoutLink').style.display = loggedIn ? 'block' : 'none';
+  if(loggedIn){
+    const display = session.username || 'Member';
+    document.getElementById('accountLabel').textContent = display.length > 12 ? display.slice(0,11)+'…' : display;
+    document.getElementById('accountAvatar').textContent = display.slice(0,1).toUpperCase();
+  }
+}
+async function checkExistingSession(){
+  if(session.phone && session.token){
+    const chk = await API.sessionCheck(session.phone, session.token);
+    if(!chk.valid){ session.phone=''; session.token=''; session.username=''; localStorage.removeItem('ajeer_phone'); localStorage.removeItem('ajeer_token'); localStorage.removeItem('ajeer_username'); }
+  }
+  reflectLoginState();
+}
+
+/* ================= Login modal ================= */
+function openLoginModal(){
+  document.getElementById('loginForm').reset();
+  document.getElementById('forgotForm').style.display='none';
+  document.getElementById('securityRecoveryForm').style.display='none';
+  document.getElementById('secRecoveryQuestionWrap').style.display='none';
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('loginMsg').className='form-msg';
+  openModal('loginModal');
+}
+function showForgot(){
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('securityRecoveryForm').style.display='none';
+  document.getElementById('forgotForm').style.display='block';
+}
+function showSecurityRecovery(){
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('forgotForm').style.display='none';
+  document.getElementById('securityRecoveryForm').style.display='block';
+}
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const phone = combinedPhone('loginCountryCode','loginPhoneLocal');
+  const password = document.getElementById('loginPassword').value.trim();
+  const msgEl = document.getElementById('loginMsg');
+  const { ok, data } = await API.login({ phone, password });
+  if(ok){
+    persistSession(phone, data.token, data.username);
+    msgEl.className='form-msg ok'; msgEl.textContent='Logged in.';
+    setTimeout(()=>closeModal('loginModal'),500);
+    await loadJobs(); await refreshStats();
+  } else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+});
+document.getElementById('forgotForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const phone = combinedPhone('forgotCountryCode','forgotPhoneLocal');
+  const email = document.getElementById('forgotEmail').value.trim();
+  const previous_password = document.getElementById('forgotPrevPassword').value.trim();
+  const msgEl = document.getElementById('forgotMsg');
+  const { ok, data } = await API.reset({ phone, email, previous_password });
+  if(ok){
+    persistSession(phone, data.token, data.username);
+    msgEl.className='form-msg ok'; msgEl.textContent='Confirmed — logged in.';
+    setTimeout(()=>closeModal('loginModal'),600);
+    await loadJobs(); await refreshStats();
+  } else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+});
+let secRecoveryPhone = '';
+async function loadSecurityQuestionForRecovery(){
+  secRecoveryPhone = combinedPhone('secRecoveryCountryCode','secRecoveryPhoneLocal');
+  const msgEl = document.getElementById('secRecoveryMsg');
+  const r = await fetch('/api/accounts/security-question?phone='+encodeURIComponent(secRecoveryPhone));
+  const data = await r.json();
+  if(!data.has_question){
+    msgEl.className='form-msg err'; msgEl.textContent = "No security question set up for this account yet — use the previous-PIN option instead, or contact support.";
+    return;
+  }
+  document.getElementById('secRecoveryQuestionLabel').textContent = data.question;
+  document.getElementById('secRecoveryQuestionWrap').style.display = 'block';
+  msgEl.className='form-msg';
+}
+document.getElementById('securityRecoveryForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = { phone: secRecoveryPhone, answer: document.getElementById('secRecoveryAnswer').value, new_pin: document.getElementById('secRecoveryNewPin').value };
+  const r = await fetch('/api/accounts/reset-with-security', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+  const data = await r.json();
+  const msgEl = document.getElementById('secRecoveryMsg');
+  if(r.ok){
+    persistSession(secRecoveryPhone, data.token, data.username);
+    msgEl.className='form-msg ok'; msgEl.textContent='PIN reset — logged in.';
+    setTimeout(()=>closeModal('loginModal'),600);
+    await loadJobs(); await refreshStats();
+  } else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+});
+
+/* ================= State + meta ================= */
+const state = { country:'ALL', category:'ALL', urgent:false, status:'ALL', q:'', sort:'new' };
+let META = { countries:[], categories:[] };
+let postMap, postMarker;
+
+const COUNTRY_CODES = [
+  {code:'+971',flag:'🇦🇪',name:'UAE'}, {code:'+974',flag:'🇶🇦',name:'Qatar'}, {code:'+90',flag:'🇹🇷',name:'Turkey'},
+  {code:'+968',flag:'🇴🇲',name:'Oman'}, {code:'+973',flag:'🇧🇭',name:'Bahrain'}, {code:'+962',flag:'🇯🇴',name:'Jordan'},
+  {code:'+965',flag:'🇰🇼',name:'Kuwait'}, {code:'+966',flag:'🇸🇦',name:'Saudi Arabia'}, {code:'+254',flag:'🇰🇪',name:'Kenya'},
+  {code:'+256',flag:'🇺🇬',name:'Uganda'}, {code:'+255',flag:'🇹🇿',name:'Tanzania'}, {code:'+251',flag:'🇪🇹',name:'Ethiopia'},
+  {code:'+234',flag:'🇳🇬',name:'Nigeria'}, {code:'+233',flag:'🇬🇭',name:'Ghana'}, {code:'+63',flag:'🇵🇭',name:'Philippines'},
+  {code:'+91',flag:'🇮🇳',name:'India'}, {code:'+92',flag:'🇵🇰',name:'Pakistan'}, {code:'+880',flag:'🇧🇩',name:'Bangladesh'},
+  {code:'+94',flag:'🇱🇰',name:'Sri Lanka'}, {code:'+977',flag:'🇳🇵',name:'Nepal'}, {code:'+62',flag:'🇮🇩',name:'Indonesia'},
+  {code:'+20',flag:'🇪🇬',name:'Egypt'}, {code:'+44',flag:'🇬🇧',name:'UK'}, {code:'+1',flag:'🇺🇸',name:'USA/Canada'},
+  {code:'+49',flag:'🇩🇪',name:'Germany'}, {code:'+33',flag:'🇫🇷',name:'France'}, {code:'+352',flag:'🇱🇺',name:'Luxembourg'},
+  {code:'+36',flag:'🇭🇺',name:'Hungary'}, {code:'+359',flag:'🇧🇬',name:'Bulgaria'}, {code:'+381',flag:'🇷🇸',name:'Serbia'},
+  {code:'+358',flag:'🇫🇮',name:'Finland'}, {code:'+46',flag:'🇸🇪',name:'Sweden'}, {code:'+47',flag:'🇳🇴',name:'Norway'},
+];
+function fillCountryCodeSelect(id, defaultCode){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.innerHTML = COUNTRY_CODES.map(c=>`<option value="${c.code}">${c.flag} ${c.code}</option>`).join('');
+  if(defaultCode) el.value = defaultCode;
+}
+function combinedPhone(codeId, localId){
+  const code = document.getElementById(codeId).value;
+  const local = document.getElementById(localId).value.replace(/\D/g,'');
+  return code + local;
+}
+function fillAllCountryCodeSelects(){
+  ['loginCountryCode','forgotCountryCode','fCountryCode','wCountryCode','applyCountryCode'].forEach(id=>fillCountryCodeSelect(id, '+971'));
+}
+
+const ADMIN_SECRET_PATH = '/staff-console-7421';
+
+async function init(){
+  META = await API.meta();
+  renderFlagRow(); renderCountryTabs(); renderStatusChips(); renderCategoryChips();
+  fillPostJobDropdowns(); fillWorkerForm(); fillChatQuickReplies(); fillAllCountryCodeSelects();
+  if(META.expert_price) document.getElementById('expertPriceLabel').textContent = `$${META.expert_price.amount} / month (demo pricing)`;
+  await refreshStats();
+  await loadJobs();
+  await checkExistingSession();
+  initPostMap();
+  if(window.location.pathname === ADMIN_SECRET_PATH){
+    showView('admin');
+  }
+}
+
+function renderFlagRow(){ document.getElementById('flagRow').innerHTML = META.countries.map(c=>`<span class="flag-chip">${c.flag} ${c.name}</span>`).join(''); }
+
+function renderCountryTabs(){
+  const el = document.getElementById('countryTabs');
+  const all = [{code:'ALL',name:'All countries',flag:'🌍'}, ...META.countries];
+  el.innerHTML = all.map(c=>`<div class="tab${c.code===state.country?' active':''}" data-code="${c.code}">${c.flag} ${c.name}</div>`).join('');
+  el.querySelectorAll('.tab').forEach(tab=>{ tab.onclick=()=>{ state.country=tab.dataset.code; syncTabs(); loadJobs(); }; });
+}
+function syncTabs(){ document.querySelectorAll('#countryTabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.code===state.country)); }
+
+const STATUS_FILTERS = [
+  {key:'ALL', label:'All statuses'}, {key:'open', label:'Open'},
+  {key:'in_process', label:'In process'}, {key:'gone', label:'Gone'},
+];
+function renderStatusChips(){
+  const el = document.getElementById('statusChips');
+  el.innerHTML = STATUS_FILTERS.map(s=>`<div class="chip${s.key===state.status?' active':''}" data-key="${s.key}">${s.label}</div>`).join('');
+  el.querySelectorAll('.chip').forEach(chip=>{ chip.onclick=()=>{ state.status=chip.dataset.key; syncStatusChips(); loadJobs(); }; });
+}
+function syncStatusChips(){ document.querySelectorAll('#statusChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.key===state.status)); }
+
+function renderCategoryChips(){
+  const el = document.getElementById('categoryChips');
+  const all = [{key:'ALL',label:'All categories',icon:''}, ...META.categories];
+  el.innerHTML = all.map(c=>`<div class="chip${c.key===state.category?' active':''}" data-key="${c.key}">${c.icon?c.icon+' ':''}${c.label}</div>`).join('');
+  el.querySelectorAll('.chip').forEach(chip=>{ chip.onclick=()=>{ state.category=chip.dataset.key; syncChips(); loadJobs(); }; });
+}
+function syncChips(){ document.querySelectorAll('#categoryChips .chip').forEach(c=>c.classList.toggle('active', c.dataset.key===state.category)); }
+
+document.getElementById('urgentToggle').onclick = function(){ state.urgent=!state.urgent; this.classList.toggle('active', state.urgent); loadJobs(); };
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e=>{ clearTimeout(searchTimer); searchTimer=setTimeout(()=>{ state.q=e.target.value.trim(); loadJobs(); },250); });
+document.getElementById('sortSel').addEventListener('change', e=>{ state.sort=e.target.value; loadJobs(); });
+
+async function refreshStats(){
+  const s = await API.stats();
+  document.getElementById('statLive').textContent = s.live_jobs;
+  document.getElementById('statUrgent').textContent = s.urgent_jobs;
+  document.getElementById('statCountries').textContent = s.countries;
+  document.getElementById('statApps').textContent = s.applications;
+}
+
+async function loadJobs(){
+  const grid = document.getElementById('jobGrid');
+  grid.innerHTML = '<div class="loading">Loading jobs from the server…</div>';
+  try {
+    const params = {};
+    if(state.country!=='ALL') params.country=state.country;
+    if(state.category!=='ALL') params.category=state.category;
+    if(state.urgent) params.urgent='1';
+    if(state.status!=='ALL') params.status=state.status;
+    if(state.q) params.q=state.q;
+    params.sort = state.sort;
+
+    const data = await API.jobs(params);
+    document.getElementById('resultsCount').textContent = `${data.count} listing${data.count !== 1 ? 's' : ''}`;
+    if(data.count===0){ grid.innerHTML = '<div class="empty">No listings match those filters — try widening your search.</div>'; return; }
+    grid.innerHTML = data.jobs.map(jobCardHTML).join('');
+    grid.querySelectorAll('[data-apply]').forEach(btn=>{ btn.onclick=(e)=>{ e.stopPropagation(); openApplyModal(btn.dataset.apply); }; });
+    grid.querySelectorAll('.card').forEach(card=>{ card.onclick=()=>{ trackViewed(card.dataset.id, data.jobs.find(j=>String(j.id)===card.dataset.id)); openDetail(card.dataset.id); }; });
+  } catch(err) {
+    console.error(err);
+    grid.innerHTML = '<div class="empty">Couldn\'t load jobs — check your connection and try again.</div>';
+  }
+}
+
+/* ================= Recently viewed (client-side only) ================= */
+function trackViewed(id, job){
+  if(!job) return;
+  let list = JSON.parse(localStorage.getItem('ajeer_recently_viewed') || '[]');
+  list = list.filter(j => j.id !== job.id);
+  list.unshift({ id: job.id, title: job.title, ref_code: job.ref_code, city: job.city, country_name: job.country_name, viewed_at: new Date().toISOString() });
+  list = list.slice(0, 20);
+  localStorage.setItem('ajeer_recently_viewed', JSON.stringify(list));
+}
+function getRecentlyViewed(){
+  return JSON.parse(localStorage.getItem('ajeer_recently_viewed') || '[]');
+}
+
+/* ================= Job detail ================= */
+async function openDetail(id){
+  document.getElementById('detailWrap').innerHTML = '<div class="loading">Loading…</div>';
+  showView('detail');
+  const job = await API.job(id);
+  if(job.error){ document.getElementById('detailWrap').innerHTML = `<a class="back-link" onclick="goHome()">&larr; Back to all jobs</a><div class="empty">${job.error}</div>`; return; }
+  document.getElementById('detailWrap').innerHTML = `
+    <a class="back-link" onclick="goHome()">&larr; Back to all jobs</a>
+    <div class="detail-card">
+      <div class="c-top" style="padding:24px 20px 18px;">
+        <div class="c-head"><span class="c-cat">${job.category_icon} ${job.category_label}</span>${job.urgent?'<span class="c-urgent">Urgent</span>':''}</div>
+        <div class="c-title" style="font-size:24px;">${esc(job.title)}</div>
+        <div class="c-loc">${job.country_flag} ${esc(job.city)}, ${job.country_name} &middot; ${esc(job.client_name)}</div>
+        <p class="c-desc" style="font-size:14.5px;margin-top:12px;">${esc(job.description)}</p>
+        <div class="c-meta" style="margin-top:8px;">
+          <span><b>${job.job_type}</b></span>
+          <span>${job.positions>1?job.positions+' positions open':'1 position open'}</span>
+          <span>${postedText(job.days_ago)}</span>
+        </div>
+      </div>
+      ${job.lat && job.lng ? `<div class="map-box" id="detailMap"></div>` : ''}
+      <div class="c-stub" style="padding:16px 20px;">
+        <div class="c-salary"><b style="font-size:20px;">${fmtMoney(job.salary_amount, job.currency)}</b><span>${job.salary_unit}</span></div>
+        <button class="btn btn-primary" onclick='openApplyModal(${job.id})'>Apply now</button>
+      </div>
+    </div>`;
+  if(job.lat && job.lng && window.L){
+    setTimeout(()=>{
+      const m = L.map('detailMap', {zoomControl:false, dragging:false, scrollWheelZoom:false}).setView([job.lat, job.lng], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(m);
+      L.marker([job.lat, job.lng]).addTo(m);
+    }, 50);
+  }
+}
+
+/* ================= Modal helpers ================= */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('open'); });
+});
+
+/* ================= Apply modal ================= */
+let applyLat=null, applyLng=null;
+async function openApplyModal(jobId){
+  const job = await API.job(jobId);
+  document.getElementById('applyJobId').value = jobId;
+  document.getElementById('modalJobTitle').textContent = `Apply — ${job.title}`;
+  document.getElementById('modalJobSub').textContent = `${job.ref_code} · ${job.city}, ${job.country_name} · ${fmtMoney(job.salary_amount, job.currency)} ${job.salary_unit}`;
+  document.getElementById('applyMsg').className = 'form-msg';
+  document.getElementById('applyMsg').textContent = '';
+  document.getElementById('applyForm').reset();
+  applyLat=null; applyLng=null;
+  openModal('applyModal');
+}
+document.getElementById('applyForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const jobId = document.getElementById('applyJobId').value;
+  const submitBtn = e.target.querySelector('button[type=submit]');
+
+  const finishSubmit = async () => {
+    const payload = {
+      name: document.getElementById('applyName').value,
+      phone: combinedPhone('applyCountryCode','applyPhone'),
+      nationality: document.getElementById('applyNationality').value,
+      experience_years: document.getElementById('applyExperience').value,
+      message: document.getElementById('applyMessage').value,
+      lat: applyLat, lng: applyLng,
+    };
+    submitBtn.disabled = true; submitBtn.textContent = 'Submitting…';
+    const { ok, data } = await API.apply(jobId, payload);
+    const msgEl = document.getElementById('applyMsg');
+    if(ok){
+      msgEl.className='form-msg ok';
+      msgEl.innerHTML = '✓ ' + data.message + ' Track it anytime from My Account.';
+      submitBtn.textContent = 'Submitted';
+      refreshStats();
+      trackApplicationForNudge();
+      if(data.account){ handleAccountReveal(data.account, 'worker'); }
+    } else {
+      msgEl.className='form-msg err';
+      msgEl.textContent = data.error || 'Something went wrong. Please try again.';
+      submitBtn.disabled = false; submitBtn.textContent = 'Submit application';
+    }
+  };
+
+  if(document.getElementById('applyShareLocation').checked && navigator.geolocation){
+    submitBtn.disabled = true; submitBtn.textContent = 'Getting location…';
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{ applyLat=pos.coords.latitude; applyLng=pos.coords.longitude; finishSubmit(); },
+      ()=>{ finishSubmit(); },
+      { timeout: 6000 }
+    );
+  } else {
+    finishSubmit();
+  }
+});
+
+/* ================= Post-registration account reveal (the "detecting" theater) ================= */
+function handleAccountReveal(account, kind){
+  persistSession(account.phone, account.token, account.username);
+  const card = document.getElementById('accountRevealCard');
+  card.innerHTML = `<h2>Automatically verifying your number and email…</h2><div class="detect-spinner"></div><p>Just a moment while we set things up.</p>`;
+  showView('accountReveal');
+  setTimeout(()=>{
+    if(account.is_new){
+      card.innerHTML = `
+        <h2>You're all set</h2>
+        <p>Your one-time login PIN is the last 5 digits of your phone number:</p>
+        <div class="password-display">${account.password}</div>
+        <p>Use your phone number + this PIN to log in anytime and check ${kind==='worker'?'your applications':'applications you receive'}. Set your own PIN, a display name, and a security question below so you're not stuck with the starting one.</p>
+        <button class="btn btn-primary btn-block" onclick="goHome()" style="margin-bottom:10px;">Skip for now</button>
+        <button class="btn btn-dark btn-block" onclick="showView('myAccount','password')">Set up my account</button>
+      `;
+    } else {
+      card.innerHTML = `
+        <h2>Welcome back</h2>
+        <p>This phone number already has an account — you're logged in.</p>
+        <button class="btn btn-primary btn-block" onclick="goHome()">Continue</button>
+      `;
+    }
+  }, 1400);
+}
+
+/* ================= Post a job (with map pin) ================= */
+function fillPostJobDropdowns(){
+  document.getElementById('fCategory').innerHTML = META.categories.map(c=>`<option value="${c.key}">${c.icon} ${c.label}</option>`).join('');
+  updateFCountryOptions();
+  document.getElementById('fCategory').addEventListener('change', ()=>{ updateFCountryOptions(); geocodeToMap(); });
+}
+function updateFCountryOptions(){
+  const cat = document.getElementById('fCategory').value;
+  const pool = cat === 'longhaul' ? (META.europe_countries || []) : (META.gulf_countries || META.countries);
+  document.getElementById('fCountry').innerHTML = pool.map(c=>`<option value="${c.code}">${c.flag} ${c.name}</option>`).join('');
+}
+function initPostMap(){
+  if(!window.L) return;
+  postMap = L.map('postMap').setView([25.2048, 55.2708], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(postMap);
+  postMarker = L.marker([25.2048, 55.2708], { draggable: true }).addTo(postMap);
+}
+async function geocodeToMap(){
+  const city = document.getElementById('fCity').value.trim();
+  const countryCode = document.getElementById('fCountry').value;
+  const countryName = (META.countries.find(c=>c.code===countryCode)||{}).name || '';
+  if(!city) return;
+  const result = await API.geocode(`${city}, ${countryName}`);
+  if(result.found && postMap && postMarker){
+    postMap.setView([result.lat, result.lng], 12);
+    postMarker.setLatLng([result.lat, result.lng]);
+  }
+}
+document.getElementById('fCity').addEventListener('blur', geocodeToMap);
+document.getElementById('fCountry').addEventListener('change', geocodeToMap);
+
+document.getElementById('postJobForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const pos = postMarker ? postMarker.getLatLng() : null;
+  const payload = {
+    title: document.getElementById('fTitle').value,
+    category: document.getElementById('fCategory').value,
+    country_code: document.getElementById('fCountry').value,
+    city: document.getElementById('fCity').value,
+    client_name: document.getElementById('fClient').value,
+    contact_phone: combinedPhone('fCountryCode','fPhone'),
+    contact_email: document.getElementById('fEmail').value,
+    lat: pos ? pos.lat : null, lng: pos ? pos.lng : null,
+    salary_amount: document.getElementById('fSalary').value,
+    salary_unit: document.getElementById('fSalaryUnit').value,
+    job_type: document.getElementById('fJobType').value,
+    positions: document.getElementById('fPositions').value,
+    urgent: document.getElementById('fUrgent').checked,
+    description: document.getElementById('fDescription').value,
+  };
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'Publishing…';
+  const { ok, data } = await API.createJob(payload);
+  const msgEl = document.getElementById('postMsg');
+  if(ok){
+    e.target.reset();
+    refreshStats();
+    if(data.account){ handleAccountReveal(data.account, 'employer'); }
+  } else {
+    msgEl.className='form-msg err';
+    msgEl.textContent = data.error || 'Something went wrong. Please check the form and try again.';
+  }
+  submitBtn.disabled = false; submitBtn.textContent = 'Publish listing';
+});
+
+/* ================= Register worker ================= */
+let selectedCountries = new Set();
+function fillWorkerForm(){
+  document.getElementById('wCategory').innerHTML = META.categories.map(c=>`<option value="${c.key}">${c.icon} ${c.label}</option>`).join('');
+  const wrap = document.getElementById('wCountries');
+  wrap.innerHTML = META.countries.map(c=>`<div class="chip" data-code="${c.code}">${c.flag} ${c.name}</div>`).join('');
+  wrap.querySelectorAll('.chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      const code = chip.dataset.code;
+      if(selectedCountries.has(code)){ selectedCountries.delete(code); chip.classList.remove('active'); }
+      else { selectedCountries.add(code); chip.classList.add('active'); }
+    };
+  });
+}
+document.getElementById('workerForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById('wName').value,
+    phone: combinedPhone('wCountryCode','wPhone'),
+    email: document.getElementById('wEmail').value,
+    nationality: document.getElementById('wNationality').value,
+    category: document.getElementById('wCategory').value,
+    experience_years: document.getElementById('wExperience').value,
+    preferred_countries: Array.from(selectedCountries),
+    bio: document.getElementById('wBio').value,
+  };
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
+  const { ok, data } = await API.registerWorker(payload);
+  const msgEl = document.getElementById('workerMsg');
+  if(ok){
+    e.target.reset(); selectedCountries.clear();
+    document.querySelectorAll('#wCountries .chip').forEach(c=>c.classList.remove('active'));
+    if(data.account){ handleAccountReveal(data.account, 'worker'); }
+  } else {
+    msgEl.className='form-msg err';
+    msgEl.textContent = data.error || 'Something went wrong. Please try again.';
+  }
+  submitBtn.disabled = false; submitBtn.textContent = 'Create profile';
+});
+
+/* ================= My Account (logged-in dashboards) ================= */
+function switchAccountTab(tab){
+  ['postings','applications','recent','password'].forEach(t=>{
+    document.getElementById('tab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+  });
+  renderAccountContent(tab).catch(err=>{
+    console.error(err);
+    document.getElementById('accountContent').innerHTML = '<div class="empty" style="padding:30px;">Something went wrong loading this tab — check your connection and try again.</div>';
+  });
+}
+async function initMyAccount(tab){
+  if(!session.phone || !session.token){
+    document.getElementById('accountContent').innerHTML = `<div class="empty" style="padding:30px;">You're not logged in. <a onclick="openLoginModal()" style="color:var(--blue);font-weight:600;">Log in</a> to see your postings and applications.</div>`;
+    return;
+  }
+  switchAccountTab(tab);
+}
+async function renderAccountContent(tab){
+  const el = document.getElementById('accountContent');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+
+  if(tab === 'recent'){
+    const list = getRecentlyViewed();
+    el.innerHTML = list.length === 0
+      ? '<div class="empty" style="padding:30px;">Nothing viewed yet — jobs you open will show up here.</div>'
+      : list.map(j => `<div class="dash-job"><div class="dash-app" style="border-top:none;cursor:pointer;" onclick="showView('myAccount'); openDetail(${j.id});">
+          <div class="dash-app-name">${esc(j.title)}</div>
+          <div class="dash-app-meta">${esc(j.ref_code)} · ${esc(j.city)}, ${esc(j.country_name)}</div>
+        </div></div>`).join('');
+    return;
+  }
+
+  if(tab === 'password'){
+    el.innerHTML = `
+      <div class="form-card" style="margin:0 0 16px;">
+        <h2>Display name</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:-8px;">Shown in the menu instead of your phone number.</p>
+        <form id="changeUsernameForm">
+          <div class="form-row"><label>Name</label><input type="text" id="changeUsernameInput" value="${esc(session.username||'')}" required></div>
+          <button type="submit" class="btn btn-ghost btn-block">Update name</button>
+          <div class="form-msg" id="changeUsernameMsg"></div>
+        </form>
+      </div>
+      <div class="form-card" style="margin:0 0 16px;">
+        <h2>Change PIN</h2>
+        <form id="changePwForm">
+          <div class="form-row"><label>Current PIN</label><input type="text" id="changePwCurrent" required></div>
+          <div class="form-row"><label>New PIN</label><input type="text" id="changePwNew" required minlength="4"></div>
+          <button type="submit" class="btn btn-primary btn-block">Update PIN</button>
+          <div class="form-msg" id="changePwMsg"></div>
+        </form>
+      </div>
+      <div class="form-card" style="margin:0;">
+        <h2>Security question</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:-8px;">Lets you recover access without your PIN if you ever forget it.</p>
+        <form id="setSecurityForm">
+          <div class="form-row"><label>Question</label>
+            <select id="setSecurityQuestion">${(META.security_questions||[]).map(q=>`<option value="${esc(q)}">${esc(q)}</option>`).join('')}</select>
+          </div>
+          <div class="form-row"><label>Your answer</label><input type="text" id="setSecurityAnswer" required></div>
+          <button type="submit" class="btn btn-ghost btn-block">Save security question</button>
+          <div class="form-msg" id="setSecurityMsg"></div>
+        </form>
+      </div>`;
+
+    document.getElementById('changeUsernameForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const username = document.getElementById('changeUsernameInput').value.trim();
+      const r = await fetch('/api/accounts/username', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone:session.phone, token:session.token, username})});
+      const data = await r.json();
+      const msgEl = document.getElementById('changeUsernameMsg');
+      if(r.ok){ session.username = username; localStorage.setItem('ajeer_username', username); reflectLoginState(); msgEl.className='form-msg ok'; msgEl.textContent = 'Name updated.'; }
+      else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+    });
+
+    document.getElementById('setSecurityForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const payload = { phone: session.phone, token: session.token,
+        question: document.getElementById('setSecurityQuestion').value,
+        answer: document.getElementById('setSecurityAnswer').value };
+      const r = await fetch('/api/accounts/security-question', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const data = await r.json();
+      const msgEl = document.getElementById('setSecurityMsg');
+      if(r.ok){ msgEl.className='form-msg ok'; msgEl.textContent = 'Security question saved.'; e.target.reset(); }
+      else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+    });
+
+    document.getElementById('changePwForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const payload = { phone: session.phone, token: session.token,
+        current_password: document.getElementById('changePwCurrent').value,
+        new_password: document.getElementById('changePwNew').value };
+      const r = await fetch('/api/accounts/change-password', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      const data = await r.json();
+      const msgEl = document.getElementById('changePwMsg');
+      if(r.ok){ msgEl.className='form-msg ok'; msgEl.textContent = data.message; e.target.reset(); }
+      else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+    });
+    return;
+  }
+
+  if(tab === 'postings'){
+    const data = await API.employerDash(session.phone, session.token);
+    if(data.needs_login){ el.innerHTML = `<div class="empty" style="padding:30px;">Session expired — <a onclick="openLoginModal()" style="color:var(--blue);font-weight:600;">log in again</a>.</div>`; return; }
+    if(!data.job_count){ el.innerHTML = '<div class="empty" style="padding:30px;">No postings found for this account yet.</div>'; return; }
+    el.innerHTML = data.jobs.map(job => `
+      <div class="dash-job">
+        <div class="dash-job-head">
+          <div><b>${esc(job.title)}</b> <span class="c-id">${job.ref_code}</span><div class="c-loc" style="margin:2px 0 0;">${job.country_flag} ${esc(job.city)}, ${job.country_name}</div></div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="c-salary"><b>${fmtMoney(job.salary_amount, job.currency)}</b><span>${job.salary_unit}</span></div>
+            <select class="status-select" data-jobid="${job.id}">
+              ${['open','in_process','gone'].map(s=>`<option value="${s}" ${s===job.status?'selected':''}>${s.replace('_',' ')}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        ${job.applications.length === 0
+          ? '<div class="dash-app" style="color:var(--muted);font-size:13px;">No applications yet.</div>'
+          : job.applications.map(a => `
+            <div class="dash-app">
+              <div class="dash-app-row">
+                <div>
+                  <div class="dash-app-name">${esc(a.name)} <span class="status-badge status-${a.status}">${a.status}</span></div>
+                  <div class="dash-app-meta">${esc(a.phone)} ${a.nationality ? '· '+esc(a.nationality) : ''} ${a.experience_years ? '· '+a.experience_years+' yrs exp' : ''}</div>
+                  ${a.message ? `<div class="dash-app-meta" style="margin-top:4px;font-style:italic;">"${esc(a.message)}"</div>` : ''}
+                  ${a.lat && a.lng ? `<a class="loc-link" target="_blank" href="https://www.openstreetmap.org/?mlat=${a.lat}&mlon=${a.lng}#map=15/${a.lat}/${a.lng}">📍 View shared location</a>` : ''}
+                </div>
+                <select class="status-select" data-appid="${a.id}">
+                  ${['submitted','viewed','contacted','hired','closed'].map(s=>`<option value="${s}" ${s===a.status?'selected':''}>${s}</option>`).join('')}
+                </select>
+              </div>
+            </div>`).join('')
+        }
+      </div>
+    `).join('');
+    el.querySelectorAll('.status-select[data-appid]').forEach(sel=>{
+      sel.onchange = () => API.setAppStatus(sel.dataset.appid, sel.value);
+    });
+    el.querySelectorAll('.status-select[data-jobid]').forEach(sel=>{
+      sel.onchange = async () => { await fetch(`/api/jobs/${sel.dataset.jobid}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:sel.value})}); loadJobs(); };
+    });
+  } else {
+    const data = await API.workerDash(session.phone, session.token);
+    if(data.needs_login){ el.innerHTML = `<div class="empty" style="padding:30px;">Session expired — <a onclick="openLoginModal()" style="color:var(--blue);font-weight:600;">log in again</a>.</div>`; return; }
+    let html = '';
+    if(data.profile){
+      const p = data.profile;
+      html += `<div class="dash-job"><div class="dash-job-head">
+        <div><b>${esc(p.name)}</b> ${p.tier==='expert' ? '<span class="status-badge status-hired">EXPERT ✓</span>' : '<span class="status-badge status-submitted">STANDARD</span>'}
+        <div class="c-loc" style="margin:2px 0 0;">${p.category_label} · ${p.experience_years} yrs experience</div></div>
+        ${p.tier!=='expert' ? `<button class="btn btn-dark btn-sm" onclick="showView('premium')">Go Expert</button>` : ''}
+      </div></div>`;
+    } else {
+      html += `<div class="empty" style="padding:20px;">No profile yet — <a onclick="showView('registerWorker')" style="color:var(--blue);font-weight:600;">create one</a> to unlock Expert tier.</div>`;
+    }
+    if(data.applications.length === 0){
+      html += '<div class="empty" style="padding:20px;">No applications submitted yet.</div>';
+    } else {
+      html += data.applications.map(a => `
+        <div class="dash-job">
+          <div class="dash-app" style="border-top:none;">
+            <div class="dash-app-row">
+              <div>
+                <div class="dash-app-name">${esc(a.job.title)} <span class="status-badge status-${a.status}">${a.status}</span></div>
+                <div class="dash-app-meta">${esc(a.job.ref_code)} · ${esc(a.job.city)}, ${esc(a.job.country_name)}</div>
+              </div>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+    if(data.cv_requests && data.cv_requests.length){
+      html += `<div class="dash-job"><div class="dash-job-head"><b>CV drafting requests</b></div>` +
+        data.cv_requests.map(c => `<div class="dash-app"><div class="dash-app-row"><div class="dash-app-meta">Requested ${new Date(c.created_at).toLocaleDateString()} for ${esc(c.target_country||'—')}</div><span class="status-badge status-viewed">${c.status}</span></div></div>`).join('') +
+        `</div>`;
+    }
+    el.innerHTML = html;
+  }
+}
+
+/* ================= Premium — express interest ================= */
+function openInterestModal(){
+  document.getElementById('upgradeForm').reset();
+  document.getElementById('upgradeMsg').className='form-msg';
+  document.getElementById('upgradeMsg').textContent='';
+  if(session.phone) document.getElementById('upgradePhone').value = session.phone;
+  openModal('upgradeModal');
+}
+document.getElementById('upgradeForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = {
+    phone: document.getElementById('upgradePhone').value,
+    name: document.getElementById('upgradeName').value,
+    preferred_payment_method: document.getElementById('upgradePaymentMethod').value,
+    note: document.getElementById('upgradeNote').value,
+  };
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+  const { ok, data } = await API.premiumInterest(payload);
+  const msgEl = document.getElementById('upgradeMsg');
+  if(ok){
+    msgEl.className='form-msg ok'; msgEl.textContent = '✓ ' + data.message;
+    submitBtn.textContent = 'Sent';
+    setTimeout(()=>{ closeModal('upgradeModal'); submitBtn.disabled=false; submitBtn.textContent='Send interest'; }, 1500);
+  } else {
+    msgEl.className='form-msg err'; msgEl.textContent = data.error || 'Something went wrong.';
+    submitBtn.disabled = false; submitBtn.textContent = 'Send interest';
+  }
+});
+
+function trackApplicationForNudge(){
+  let count = parseInt(localStorage.getItem('ajeer_apply_count') || '0', 10) + 1;
+  localStorage.setItem('ajeer_apply_count', String(count));
+  if(count === 2 || count === 5){
+    setTimeout(()=>{ if(!document.getElementById('upgradeModal').classList.contains('open')) openModal('nudgeModal'); }, 1600);
+  }
+}
+
+document.getElementById('cvRequestForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = {
+    worker_phone: document.getElementById('cvPhone').value,
+    name: document.getElementById('cvName').value,
+    current_role: document.getElementById('cvRole').value,
+    target_country: document.getElementById('cvCountry').value,
+    experience_summary: document.getElementById('cvSummary').value,
+  };
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true; submitBtn.textContent = 'Submitting…';
+  const { ok, data } = await API.cvRequest(payload);
+  const msgEl = document.getElementById('cvMsg');
+  if(ok){ msgEl.className='form-msg ok'; msgEl.textContent = '✓ ' + data.message; e.target.reset(); }
+  else { msgEl.className='form-msg err'; msgEl.textContent = data.error || 'Something went wrong.'; }
+  submitBtn.disabled = false; submitBtn.textContent = 'Submit CV request';
+});
+
+/* ================= Chat widget (two-way) ================= */
+let chatPhone = localStorage.getItem('ajeer_chat_phone') || session.phone || '';
+let chatPollTimer = null;
+function toggleChat(){
+  const panel = document.getElementById('chatPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) openChatInner();
+}
+function openChat(){ document.getElementById('chatPanel').classList.add('open'); openChatInner(); }
+function openChatInner(){
+  if(chatPhone){ startChat(); } else { document.getElementById('chatPhoneGate').style.display='block'; document.getElementById('chatMain').style.display='none'; }
+}
+async function startChat(){
+  const input = document.getElementById('chatPhoneInput');
+  if(input && input.value.trim()) chatPhone = input.value.trim();
+  if(!chatPhone){ return; }
+  localStorage.setItem('ajeer_chat_phone', chatPhone);
+  document.getElementById('chatPhoneGate').style.display='none';
+  document.getElementById('chatMain').style.display='flex';
+  await loadChatThread();
+  clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(loadChatThread, 6000);
+  if(document.getElementById('chatBody').children.length === 0){
+    pushChatBubble('bot', "Hi! Ask about salaries, applying, posting a job, or Expert membership — or type your own message and we'll get back to you personally.");
+  }
+}
+function fillChatQuickReplies(){
+  const q = document.getElementById('chatQuick');
+  const topics = ['driver jobs','caregiver jobs','nanny jobs','hotel jobs','salary','apply','post a job','expert / premium'];
+  q.innerHTML = topics.map(t=>`<button onclick="askChat('${t}')">${t}</button>`).join('');
+}
+function pushChatBubble(who, text){
+  const body = document.getElementById('chatBody');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + who;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+async function loadChatThread(){
+  if(!chatPhone) return;
+  const data = await API.chatThread(chatPhone);
+  const body = document.getElementById('chatBody');
+  const existingCount = body.querySelectorAll('.chat-msg.user, .chat-msg.admin').length;
+  if((data.messages || []).length <= existingCount) return;
+  body.innerHTML = '';
+  (data.messages || []).forEach(m => pushChatBubble(m.sender === 'admin' ? 'admin' : 'user', m.message));
+  body.scrollTop = body.scrollHeight;
+}
+function askChat(text){ pushChatBubble('user', text); respondChat(text); }
+function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  API.chatSend(chatPhone, text);
+  pushChatBubble('user', text);
+  respondChat(text);
+}
+document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
+
+async function respondChat(text){
+  const lower = text.toLowerCase();
+  const faq = (META.faq || []);
+  const hit = faq.find(f => f.keywords.some(k => lower.includes(k)));
+  if(hit){ setTimeout(()=> pushChatBubble('bot', hit.answer), 300); return; }
+  setTimeout(()=> pushChatBubble('bot', "Thanks — that's been sent to our team and we'll reply here personally."), 300);
+}
+
+/* ================= Admin ================= */
+let adminPw = '';
+async function adminLogin(){
+  const pw = document.getElementById('adminPassword').value;
+  const msgEl = document.getElementById('adminLoginMsg');
+  const check = await API.adminLeads(pw);
+  if(check.error){ msgEl.className='form-msg err'; msgEl.textContent = check.error; return; }
+  adminPw = pw;
+  document.getElementById('adminLoginCard').style.display = 'none';
+  document.getElementById('adminResults').style.display = 'block';
+  document.getElementById('adminLogoutBtn').style.display = 'inline-flex';
+  switchAdminTab('leads');
+}
+function adminLogout(){
+  adminPw = '';
+  document.getElementById('adminLoginCard').style.display = 'block';
+  document.getElementById('adminResults').style.display = 'none';
+  document.getElementById('adminLogoutBtn').style.display = 'none';
+  document.getElementById('adminPassword').value = '';
+}
+function switchAdminTab(tab){
+  ['leads','tickets','chats','analytics','accounts','password'].forEach(t=>{
+    document.getElementById('adminTab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active', t===tab);
+    document.getElementById('adminPane'+t[0].toUpperCase()+t.slice(1)).style.display = (t===tab) ? 'block' : 'none';
+  });
+  const fail = (elId) => (err) => { console.error(err); const el=document.getElementById(elId); if(el) el.innerHTML = '<div class="empty">Something went wrong loading this — try again.</div>'; };
+  if(tab==='leads') refreshAdminLeads().catch(fail('adminLeads'));
+  if(tab==='tickets') refreshAdminTickets().catch(fail('adminTickets'));
+  if(tab==='chats') refreshAdminChats().catch(fail('adminChatList'));
+  if(tab==='analytics') refreshAdminAnalytics().catch(fail('adminAnalytics'));
+  if(tab==='accounts') refreshAdminAccounts().catch(fail('adminAccountsList'));
+}
+async function refreshAdminAnalytics(){
+  const r = await fetch('/api/admin/analytics?password='+encodeURIComponent(adminPw));
+  const data = await r.json();
+  const el = document.getElementById('adminAnalytics');
+  if(data.error){ el.innerHTML = `<div class="empty">${data.error}</div>`; return; }
+  const t = data.totals;
+  el.innerHTML = `
+    <div class="hero-stats" style="border-top:none;margin-top:0;">
+      <div class="stat"><b>${t.jobs_total}</b><span>Total jobs</span></div>
+      <div class="stat"><b>${t.jobs_open}</b><span>Open</span></div>
+      <div class="stat"><b>${t.jobs_in_process}</b><span>In process</span></div>
+      <div class="stat"><b>${t.jobs_gone}</b><span>Gone</span></div>
+      <div class="stat"><b>${t.applications_total}</b><span>Applications</span></div>
+      <div class="stat"><b>${t.accounts_total}</b><span>Accounts</span></div>
+    </div>
+    <div class="dash-job" style="margin-top:20px;"><div class="dash-job-head"><b>Applications by category</b></div>
+      ${data.by_category.map(c=>`<div class="dash-app"><div class="dash-app-row"><div>${c.label}</div><b>${c.count}</b></div></div>`).join('') || '<div class="dash-app">No data yet.</div>'}
+    </div>
+    <div class="dash-job"><div class="dash-job-head"><b>Applications by country</b></div>
+      ${data.by_country.map(c=>`<div class="dash-app"><div class="dash-app-row"><div>${c.name}</div><b>${c.count}</b></div></div>`).join('') || '<div class="dash-app">No data yet.</div>'}
+    </div>
+    <div class="dash-job"><div class="dash-job-head"><b>Most-applied jobs</b></div>
+      ${data.top_jobs.map(j=>`<div class="dash-app"><div class="dash-app-row"><div>${esc(j.title)} <span class="c-id">${j.ref_code}</span><div class="dash-app-meta">${esc(j.city)}, ${esc(j.country)}</div></div><b>${j.count}</b></div></div>`).join('') || '<div class="dash-app">No applications yet.</div>'}
+    </div>`;
+}
+async function refreshAdminAccounts(){
+  const phone = document.getElementById('adminAccountSearch').value.trim();
+  const r = await fetch('/api/admin/accounts?password='+encodeURIComponent(adminPw)+'&phone='+encodeURIComponent(phone));
+  const data = await r.json();
+  const el = document.getElementById('adminAccountsList');
+  if(!data.accounts || !data.accounts.length){ el.innerHTML = '<div class="empty" style="padding:16px;">No accounts found.</div>'; return; }
+  el.innerHTML = data.accounts.map(a => `
+    <div class="admin-lead">
+      <div class="admin-lead-row">
+        <div><b>${esc(a.phone)}</b>${a.email ? ' · '+esc(a.email) : ''}<div class="dash-app-meta">Created ${new Date(a.created_at).toLocaleDateString()}</div></div>
+        <button class="btn btn-danger btn-sm" onclick="adminDeleteAccount('${esc(a.phone)}')">Delete account</button>
+      </div>
+    </div>`).join('');
+}
+async function adminDeleteAccount(phone){
+  const r = await fetch(`/api/admin/accounts/${encodeURIComponent(phone)}`, {method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: adminPw})});
+  await r.json();
+  await refreshAdminAccounts();
+}
+async function refreshAdminLeads(){
+  const data = await API.adminLeads(adminPw);
+  const el = document.getElementById('adminLeads');
+  const pending = (data.leads || []).filter(l => l.status === 'pending');
+  if(!pending.length){ el.innerHTML = '<div class="empty" style="padding:16px;">No pending requests.</div>'; return; }
+  el.innerHTML = pending.map(l => `
+    <div class="admin-lead">
+      <div class="admin-lead-row">
+        <div>
+          <b>${esc(l.name)}</b> — ${esc(l.phone)}
+          <div class="dash-app-meta">Prefers: ${esc(l.preferred_payment_method || '—')}</div>
+          ${l.note ? `<div class="dash-app-meta" style="font-style:italic;">"${esc(l.note)}"</div>` : ''}
+        </div>
+        <span class="status-badge status-submitted">${l.status}</span>
+      </div>
+      <div class="admin-lead-actions">
+        <button class="btn btn-primary btn-sm" onclick="adminActOnLead(${l.id},'approve')">Approve &amp; activate</button>
+        <button class="btn btn-danger btn-sm" onclick="adminActOnLead(${l.id},'decline')">Decline</button>
+      </div>
+    </div>`).join('');
+}
+async function adminActOnLead(id, action){
+  if(action==='approve') await API.adminApproveLead(id, adminPw);
+  else await API.adminDeclineLead(id, adminPw);
+  await refreshAdminLeads();
+}
+async function refreshAdminTickets(){
+  const data = await API.adminTickets(adminPw);
+  const el = document.getElementById('adminTickets');
+  const open = (data.tickets || []).filter(t => t.status === 'open');
+  if(!open.length){ el.innerHTML = '<div class="empty" style="padding:16px;">No open tickets.</div>'; return; }
+  el.innerHTML = open.map(t => `
+    <div class="admin-lead">
+      <div class="admin-lead-row">
+        <div><b>${esc(t.name || 'Anonymous')}</b> ${t.contact ? '· '+esc(t.contact) : ''}<div class="dash-app-meta">${esc(t.message)}</div></div>
+        <span class="status-badge status-submitted">${t.status}</span>
+      </div>
+      <div class="admin-lead-actions"><button class="btn btn-primary btn-sm" onclick="adminResolveTicket(${t.id})">Mark resolved</button></div>
+    </div>`).join('');
+}
+async function adminResolveTicket(id){ await API.adminResolveTicket(id, adminPw); await refreshAdminTickets(); }
+
+let adminActiveChatPhone = null;
+async function refreshAdminChats(){
+  const data = await API.adminChats(adminPw);
+  const el = document.getElementById('adminChatList');
+  if(!data.conversations || !data.conversations.length){ el.innerHTML = '<div class="empty" style="padding:16px;">No messages yet.</div>'; return; }
+  el.innerHTML = data.conversations.map(c => `
+    <div class="chat-thread-item" onclick="openAdminChatThread('${esc(c.phone)}')">
+      <b>${esc(c.phone)}</b>
+      <div class="dash-app-meta">${esc(c.last_message)}</div>
+    </div>`).join('');
+}
+async function openAdminChatThread(phone){
+  adminActiveChatPhone = phone;
+  document.getElementById('adminChatList').parentElement.querySelector('#adminChatList').style.display='none';
+  document.getElementById('adminChatThreadWrap').style.display='block';
+  document.getElementById('adminChatPhone').textContent = phone;
+  await loadAdminChatThread();
+}
+function closeAdminChatThread(){
+  adminActiveChatPhone = null;
+  document.getElementById('adminChatList').style.display='block';
+  document.getElementById('adminChatThreadWrap').style.display='none';
+}
+async function loadAdminChatThread(){
+  if(!adminActiveChatPhone) return;
+  const data = await API.chatThread(adminActiveChatPhone);
+  const el = document.getElementById('adminChatThread');
+  el.innerHTML = (data.messages||[]).map(m => `<div class="chat-msg ${m.sender==='admin'?'admin':'user'}" style="max-width:90%;margin-bottom:6px;${m.sender==='admin'?'margin-left:auto;background:var(--blue);color:#fff;':''}">${esc(m.message)}</div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+async function adminSendReply(){
+  const input = document.getElementById('adminChatReplyInput');
+  const message = input.value.trim();
+  if(!message || !adminActiveChatPhone) return;
+  input.value = '';
+  await API.adminChatReply(adminActiveChatPhone, adminPw, message);
+  await loadAdminChatThread();
+}
+
+document.getElementById('adminChangePwForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const payload = { current_password: document.getElementById('adminCurrentPw').value, new_password: document.getElementById('adminNewPw').value };
+  const { ok, data } = await API.adminChangePassword(payload);
+  const msgEl = document.getElementById('adminChangePwMsg');
+  if(ok){ msgEl.className='form-msg ok'; msgEl.textContent = data.message; adminPw = payload.new_password; e.target.reset(); }
+  else { msgEl.className='form-msg err'; msgEl.textContent = data.error; }
+});
+
+/* ================= Init ================= */
+init();
+</script>
+</body>
+</html>
